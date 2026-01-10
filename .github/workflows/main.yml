@@ -1,0 +1,30 @@
+name: Sync Tags
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 每天凌晨2点运行
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  sync-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.PAT_TOKEN }}
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+      
+      - name: Fetch upstream tags
+        run: |
+          git remote add upstream https://github.com/TriliumNext/Trilium.git || true
+          git fetch upstream --tags
+      
+      - name: Push tags to fork
+        run: |
+          git push origin --tags
